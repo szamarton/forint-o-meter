@@ -3,3 +3,4 @@ squarify
 numpy
 pandas
 plotly
+kaleido
