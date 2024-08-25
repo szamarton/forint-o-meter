@@ -17,17 +17,17 @@ def import_data():
     data = pd.read_csv('data.csv', encoding='UTF-8')
     data = data.dropna()
     data = data[data['use']==1]
-    all_labels_long = data['name'].values
-    return data, all_labels_long
+    all_labels_short = data['short'].values
+    return data, all_labels_short
 
-def filtering(all_labels_long):
+def filtering(all_labels_short):
     with st.sidebar.expander("Referencia adatok"):
         container = st.container()
         all = st.checkbox("Összes", True)
         if all:
-            selected_options = container.multiselect("Válasszon referenciákat:",all_labels_long,all_labels_long)
+            selected_options = container.multiselect("Válasszon referenciákat:",all_labels_short,all_labels_short)
         else:
-            selected_options =  container.multiselect("Válasszon referenciákat:",all_labels_long)
+            selected_options =  container.multiselect("Válasszon referenciákat:",all_labels_short)
         return selected_options
 
 def get_user_input():
@@ -91,8 +91,8 @@ def streamlit_credits():
 def main():
 
     streamlit_config()
-    data, all_labels_long = import_data()
-    selected_options = filtering(all_labels_long)
+    data, all_labels_short = import_data()
+    selected_options = filtering(all_labels_short)
 
     filtered_data = data[data['name'].isin(selected_options)]
 
