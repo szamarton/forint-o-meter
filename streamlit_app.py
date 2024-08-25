@@ -94,7 +94,7 @@ def main():
     data, all_labels_short = import_data()
     selected_options = filtering(all_labels_short)
 
-    filtered_data = data[data['name'].isin(selected_options)]
+    filtered_data = data[data['short'].isin(selected_options)]
 
     values = filtered_data['amount'].values
     labels_long = filtered_data['name'].values
