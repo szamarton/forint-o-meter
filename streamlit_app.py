@@ -52,10 +52,43 @@ def get_user_input():
 
     return user_value, user_label
 
+def create_viz_data(filtered_data, user_label, user_value):
+    # def get_string_with_breaks(string, max_length):
+    #     words = string.split()
+    #     lines = []
+    #     line = ''
+    #     c = 0
+    #     for word in words:
+    #         if c + len(word) > max_length:
+    #             lines.append(line)
+    #             line = word + ' '
+    #             c = len(word)
+    #         else:
+    #             line += word + ' '
+    #             c += len(word)
+    #     return "<br>".join(lines + [line])
+
+    values = filtered_data['amount'].values
+    labels_long = filtered_data['name'].values
+    labels_short = filtered_data['short'].values
+    categories = filtered_data['category'].values
+
+    viz_data = pd.DataFrame()
+    viz_data['labels_long'] = [*labels_long, user_label]
+    viz_data['labels_short'] = [*labels_short, user_label]
+    viz_data['amount'] = [*values, user_value]
+    viz_data['category'] = [*categories, '-']
+    viz_data['amount_str'] = viz_data['amount'].apply(lambda value: f"{round(value/1e9)} Mrd HUF")
+    # viz_data['labels_long_with_break'] = viz_data.apply(lambda row: get_string_with_breaks(row['labels_long'], 1.25*len(row['labels_short'])), axis=1)
+
+    viz_data['full_name'] = viz_data.apply(lambda row: f"<b>{row['labels_short']}</b><br><br>Leírás: {row['labels_long']}<br>Összeg: {row['amount_str']}<br>Kategória: {row['category']}<br>", axis=1)
+
+    return viz_data
+
 def create_fig(viz_data):
 
     fig = px.treemap(
-        viz_data, path=['labels_short'], values='amount', color='category', 
+        viz_data, path=['full_name'], values='amount', color='category', 
         title='Mit jelent egy milliárd forint?', 
         color_discrete_map=CATEGORY_COLOR_MAP,
         custom_data = ['labels_short', 'labels_long', 'amount', 'category', 'amount_str'])
@@ -96,22 +129,11 @@ def main():
 
     filtered_data = data[data['short'].isin(selected_options)]
 
-    values = filtered_data['amount'].values
-    labels_long = filtered_data['name'].values
-    labels_short = filtered_data['short'].values
-    categories = filtered_data['category'].values
-
     user_value, user_label = get_user_input()
 
     if len(selected_options) > 0:
 
-        viz_data = pd.DataFrame()
-        viz_data['labels_long'] = [*labels_long, user_label]
-        viz_data['labels_short'] = [*labels_short, user_label]
-        viz_data['amount'] = [*values, user_value]
-        viz_data['category'] = [*categories, '-']
-        viz_data['amount_str'] = viz_data['amount'].apply(lambda value: f"{round(value/1e9)} Mrd HUF")
-        
+        viz_data = create_viz_data(filtered_data, user_label, user_value)        
         fig = create_fig(viz_data)
         st.plotly_chart(fig, config={'displayModeBar': False})
         download_fig_button(fig)
